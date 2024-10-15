@@ -104,7 +104,6 @@ public class gusto_opencv_example : MonoBehaviour
             detector, 
             m_webCamTexture.GetPixels32(), m_webCamTexture.height, m_webCamTexture.width, 
             bboxes, confidences, classIds, proposal_len);
-
         min_det_time = Math.Min(min_det_time, measure_time);
         max_det_time = Math.Max(max_det_time, measure_time);
         total_det_time += measure_time;

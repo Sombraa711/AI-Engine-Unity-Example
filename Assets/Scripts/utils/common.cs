@@ -26,7 +26,7 @@ namespace Gusto
                 System.IO.File.WriteAllBytes(datapath, reader.bytes);
                 
             }else if(Application.platform == RuntimePlatform.LinuxPlayer || Application.platform == RuntimePlatform.LinuxEditor){
-                // Desktop
+                // Windows
                 datapath = System.IO.Path.Combine(Application.streamingAssetsPath, rel_path_to_streamingassets);
             }
             else{
