@@ -59,9 +59,9 @@ namespace Gusto
 
         public static float[, ] decode_blazeface_output(float[, ] raw_boxes, float[, ] anchors)
         {
-            for (int i = 0; i < 10; i++){
-                    Debug.Log("Anchor: " + anchors[0, 0] + " " + anchors[i, 1] + " " + anchors[i, 2] + " " + anchors[i, 3]);
-                }
+            // for (int i = 0; i < 10; i++){
+            //         Debug.Log("Anchor: " + anchors[0, 0] + " " + anchors[i, 1] + " " + anchors[i, 2] + " " + anchors[i, 3]);
+            //     }
             float[,] boxes = new float[raw_boxes.GetLength(0), 4];
             for (int i = 0; i < raw_boxes.GetLength(0); i++)
             {
