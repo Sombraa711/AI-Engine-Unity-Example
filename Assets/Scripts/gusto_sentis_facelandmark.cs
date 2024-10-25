@@ -19,7 +19,7 @@ public class gusto_sentis_facelandmark : MonoBehaviour
     Model runtimeModel;
     public ModelAsset modelAsset;
     List<Model.Output> output;
-    double[,] anchors;
+    float[,] anchors;
     Worker worker;
     Tensor<float> inputTensor;
     float measure_time;
@@ -80,6 +80,7 @@ public class gusto_sentis_facelandmark : MonoBehaviour
 
         runtimeModel = ModelLoader.Load(modelAsset);
         string anchors_bin_file = Gusto.Utility.retrieve_streamingassets_data("anchor.bin");
+
         anchors = Gusto.Utility.LoadBinaryFile2D(anchors_bin_file, 896, 4);
         // runtimeModel = ModelLoader.Load(Gusto.Utility.retrieve_streamingassets_data("Weights/face_detector.sentis"));
         output = runtimeModel.outputs;
@@ -174,23 +175,12 @@ public class gusto_sentis_facelandmark : MonoBehaviour
                         boxes2d[i, j] = dets[i * dets_shape[2] + j];
                     }
                 }
-                for (int i = 0; i < 10; i++)
-                {
-                    // $ string
-                    Debug.Log($"i: {i}, boxes2d: {boxes2d[i, 0]} {boxes2d[i, 1]} {boxes2d[i, 2]} {boxes2d[i, 3]}");
-                    // Debug.Log("boxes2d: " + boxes2d[i, 0] + " " + boxes2d[i, 1] + " " + boxes2d[i, 2] + " " + boxes2d[i, 3]);
-                }
                 float[, ] decoded_boxes = Gusto.Utility.decode_blazeface_output(boxes2d, anchors);
-                // Debug.Log("decoded_boxes: " + decoded_boxes[307, 0] + " " + decoded_boxes[307, 1] + " " + decoded_boxes[307, 2] + " " + decoded_boxes[307, 3]);
                 for (int i = 0; i < dets_shape[1]; i++)
                 {
                     for (int j = 0; j < 4; j++)
                     {
                         boxes_drop_kpts[i * 4 + j] = decoded_boxes[i, j];
-                        // if (i < 10)
-                        // {
-                        //     Debug.Log(i + " " + " " + j + " " + decoded_boxes[i, j]);
-                        // }
                     }
                 }
                 int[] indices = new int[100 * dets_shape[0]];
@@ -198,25 +188,23 @@ public class gusto_sentis_facelandmark : MonoBehaviour
                 int[] num_detections = new int[dets_shape[0]];
                 Gusto.Utility.nms_with_sigmoid(boxes_drop_kpts, boxes_drop_kpts_shape, scores, scores_shape_, 0.8f, 0.5f, indices, indices_cls, num_detections);
                 // find the max score
-                // print("max_score: " + scores.Max() + " " + Array.IndexOf(scores, scores.Max()));
-                Debug.Log("max_score indices: " + decoded_boxes[ Array.IndexOf(scores, scores.Max()), 0] + " " + decoded_boxes[ Array.IndexOf(scores, scores.Max()), 1] + " " + decoded_boxes[ Array.IndexOf(scores, scores.Max()), 2] + " " + decoded_boxes[ Array.IndexOf(scores, scores.Max()), 3]);
 
                 // print("num_detections: " + num_detections[0]);
                 for (int i = 0; i < num_detections[0]; i++)
                 {
-                    Debug.Log("indices: " + scores[i]);
+                    Debug.Log("scores: " + scores[indices[i]]);
                     // Debug.Log("detection indices: " + indices[i]);
                     // Debug.Log("detection boxes_drop_kpts: " + boxes_drop_kpts[indices[i] * 4] + " " + boxes_drop_kpts[indices[i] * 4 + 1] + " " + boxes_drop_kpts[indices[i] * 4 + 2] + " " + boxes_drop_kpts[indices[i] * 4 + 3]);
                     Debug.Log("detection decoded_boxes: " + decoded_boxes[indices[i], 0] + " " + decoded_boxes[indices[i], 1] + " " + decoded_boxes[indices[i], 2] + " " + decoded_boxes[indices[i], 3]);
-                    var x1 = Mathf.Lerp(rect.xMin, rect.xMax, decoded_boxes[indices[i], 0]);
-                    var y1 = Mathf.Lerp(rect.yMin, rect.yMax, decoded_boxes[indices[i], 1]);
-                    var x2 = Mathf.Lerp(rect.xMin, rect.xMax, decoded_boxes[indices[i], 2]);
-                    var y2 = Mathf.Lerp(rect.yMin, rect.yMax, decoded_boxes[indices[i], 3]);
+                    // var x1 = Mathf.Lerp(rect.xMin, rect.xMax, decoded_boxes[indices[i], 0]);
+                    // var y1 = Mathf.Lerp(rect.yMin, rect.yMax, decoded_boxes[indices[i], 1]);
+                    // var x2 = Mathf.Lerp(rect.xMin, rect.xMax, decoded_boxes[indices[i], 2]);
+                    // var y2 = Mathf.Lerp(rect.yMin, rect.yMax, decoded_boxes[indices[i], 3]);
                     
-                    Debug.Log("x1: " + x1 + " y1: " + y1 + " x2: " + x2 + " y2: " + y2);
-                    var finalRect = Rect.MinMaxRect(Mathf.Min(x1, x2), Mathf.Min(y1, y2), Mathf.Max(x1, x2), Mathf.Max(y1, y2));
-                    m_debugRect.anchoredPosition = finalRect.center;
-                    m_debugRect.sizeDelta = finalRect.size;
+                    // // Debug.Log("x1: " + x1 + " y1: " + y1 + " x2: " + x2 + " y2: " + y2);
+                    // var finalRect = Rect.MinMaxRect(Mathf.Min(x1, x2), Mathf.Min(y1, y2), Mathf.Max(x1, x2), Mathf.Max(y1, y2));
+                    // m_debugRect.anchoredPosition = finalRect.center;
+                    // m_debugRect.sizeDelta = finalRect.size;
                 }
                 inferencePending = false;
                 outputTensors.Clear(); 
