@@ -107,11 +107,13 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
         float h_ratio = 1 / 320.0f;
         float w_ratio = 1 / 320.0f;
 
-        TextureConverter.ToTensor(m_webCamTexture, inputTensor, new TextureTransform());
 
 
         if (!inferencePending)
         {
+    
+            TextureConverter.ToTensor(m_webCamTexture, inputTensor, new TextureTransform());
+
             start_time = Time.realtimeSinceStartup;
             worker.Schedule(inputTensor);
 

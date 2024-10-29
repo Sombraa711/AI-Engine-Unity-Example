@@ -119,13 +119,14 @@ public class gusto_sentis_facelandmark : MonoBehaviour
 
         Graphics.Blit(m_webCamTexture, m_tempRenderTexture);
 
-        TextureConverter.ToTensor(m_tempRenderTexture, inputTensor, face_landmark_transform);
 
-        RenderTexture.ReleaseTemporary(m_tempRenderTexture);
+        // RenderTexture.ReleaseTemporary(m_tempRenderTexture);
 
-        Debug.Log("m_webCamTexture: " + m_webCamTexture.width + " " + m_webCamTexture.height);
+        // Debug.Log("m_webCamTexture: " + m_webCamTexture.width + " " + m_webCamTexture.height);
         if (!inferencePending)
         {
+            TextureConverter.ToTensor(m_tempRenderTexture, inputTensor, face_landmark_transform);
+
             start_time = Time.realtimeSinceStartup;
             worker.Schedule(inputTensor);
 
