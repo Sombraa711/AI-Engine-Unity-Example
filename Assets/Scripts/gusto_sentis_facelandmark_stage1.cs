@@ -30,6 +30,7 @@ public class gusto_sentis_facelandmark : MonoBehaviour
 
     bool has_det = false;
     WebCamTexture m_webCamTexture;
+    RenderTexture m_tempRenderTexture;
     WebCamDevice[] m_devices;
     int camera_id = 0;
     
@@ -113,9 +114,16 @@ public class gusto_sentis_facelandmark : MonoBehaviour
 
         TextureTransform face_landmark_transform = new TextureTransform();
         face_landmark_transform.SetTensorLayout(TensorLayout.NHWC);
-        TextureConverter.ToTensor(m_webCamTexture, inputTensor, face_landmark_transform);
 
+        m_tempRenderTexture = RenderTexture.GetTemporary(m_webCamTexture.width, m_webCamTexture.height, 0, RenderTextureFormat.ARGB32);
 
+        Graphics.Blit(m_webCamTexture, m_tempRenderTexture);
+
+        TextureConverter.ToTensor(m_tempRenderTexture, inputTensor, face_landmark_transform);
+
+        RenderTexture.ReleaseTemporary(m_tempRenderTexture);
+
+        Debug.Log("m_webCamTexture: " + m_webCamTexture.width + " " + m_webCamTexture.height);
         if (!inferencePending)
         {
             start_time = Time.realtimeSinceStartup;
@@ -192,10 +200,11 @@ public class gusto_sentis_facelandmark : MonoBehaviour
                 // print("num_detections: " + num_detections[0]);
                 for (int i = 0; i < num_detections[0]; i++)
                 {
-                    Debug.Log("scores: " + scores[indices[i]]);
-                    // Debug.Log("detection indices: " + indices[i]);
-                    // Debug.Log("detection boxes_drop_kpts: " + boxes_drop_kpts[indices[i] * 4] + " " + boxes_drop_kpts[indices[i] * 4 + 1] + " " + boxes_drop_kpts[indices[i] * 4 + 2] + " " + boxes_drop_kpts[indices[i] * 4 + 3]);
-                    Debug.Log("detection decoded_boxes: " + decoded_boxes[indices[i], 0] + " " + decoded_boxes[indices[i], 1] + " " + decoded_boxes[indices[i], 2] + " " + decoded_boxes[indices[i], 3]);
+                    // Debug.Log("scores: " + scores[indices[i]]);
+                    // 0-1 base
+                    // Debug.Log("detection decoded_boxes: " + decoded_boxes[indices[i], 0] + " " + decoded_boxes[indices[i], 1] + " " + decoded_boxes[indices[i], 2] + " " + decoded_boxes[indices[i], 3]);
+                    
+                    
                     // var x1 = Mathf.Lerp(rect.xMin, rect.xMax, decoded_boxes[indices[i], 0]);
                     // var y1 = Mathf.Lerp(rect.yMin, rect.yMax, decoded_boxes[indices[i], 1]);
                     // var x2 = Mathf.Lerp(rect.xMin, rect.xMax, decoded_boxes[indices[i], 2]);
