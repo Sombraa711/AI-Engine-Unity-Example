@@ -167,14 +167,16 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
                 Debug.Log("valid index: " + indices[0]);
                 for (int i = 0; i < num_detections[0]; i++)
                 {
-                    var x1 = Mathf.Lerp(rect.xMin, rect.xMax, dets[indices[i] * 4] * w_ratio);
-                    var y1 = Mathf.Lerp(rect.yMin, rect.yMax, dets[indices[i] * 4 + 1] * h_ratio);
-                    var x2 = Mathf.Lerp(rect.xMin, rect.xMax, dets[indices[i] * 4 + 2] * w_ratio);
-                    var y2 = Mathf.Lerp(rect.yMin, rect.yMax, dets[indices[i] * 4 + 3] * h_ratio);
+                    Debug.Log($"dets: {dets[indices[i] * 4]} {dets[indices[i] * 4 + 1]} {dets[indices[i] * 4 + 2]} {dets[indices[i] * 4 + 3]}");
+                    Debug.Log($"dets rescaled: {dets[indices[i] * 4] * w_ratio} {dets[indices[i] * 4 + 1] * h_ratio} {dets[indices[i] * 4 + 2] * w_ratio} {dets[indices[i] * 4 + 3] * h_ratio}");
+                    // var x1 = Mathf.Lerp(rect.xMin, rect.xMax, dets[indices[i] * 4] * w_ratio);
+                    // var y1 = Mathf.Lerp(rect.yMin, rect.yMax, dets[indices[i] * 4 + 1] * h_ratio);
+                    // var x2 = Mathf.Lerp(rect.xMin, rect.xMax, dets[indices[i] * 4 + 2] * w_ratio);
+                    // var y2 = Mathf.Lerp(rect.yMin, rect.yMax, dets[indices[i] * 4 + 3] * h_ratio);
                     // Debug.Log("x1: " + x1 + " y1: " + y1 + " x2: " + x2 + " y2: " + y2);
-                    var finalRect = Rect.MinMaxRect(Mathf.Min(x1, x2), Mathf.Min(y1, y2), Mathf.Max(x1, x2), Mathf.Max(y1, y2));
-                    m_debugRect.anchoredPosition = finalRect.center;
-                    m_debugRect.sizeDelta = finalRect.size;
+                    // var finalRect = Rect.MinMaxRect(Mathf.Min(x1, x2), Mathf.Min(y1, y2), Mathf.Max(x1, x2), Mathf.Max(y1, y2));
+                    // m_debugRect.anchoredPosition = finalRect.center;
+                    // m_debugRect.sizeDelta = finalRect.size;
                 }
                 inferencePending = false;
                 outputTensors.Clear(); 
