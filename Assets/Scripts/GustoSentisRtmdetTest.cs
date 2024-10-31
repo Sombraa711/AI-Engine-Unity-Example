@@ -120,12 +120,12 @@ public class GustoSentisRtmdetTest : MonoBehaviour
                     Debug.Log("valid index: " + indices[0]);
                     for (int i = 0; i < num_detections[0]; i++)
                     {
-                        var x1 = Mathf.Lerp(rect.xMin, rect.xMax, dets[indices[i] * 4] / 320F);
-                        var y1 = Mathf.Lerp(rect.yMin, rect.yMax, dets[indices[i] * 4 + 1] / 320F);
-                        var x2 = Mathf.Lerp(rect.xMin, rect.xMax, dets[indices[i] * 4 + 2] / 320F);
-                        var y2 = Mathf.Lerp(rect.yMin, rect.yMax, dets[indices[i] * 4 + 3] / 320F);
-                        // Debug.Log("x1: " + x1 + " y1: " + y1 + " x2: " + x2 + " y2: " + y2);
-                        var finalRect = Rect.MinMaxRect(Mathf.Min(x1, x2), Mathf.Min(y1, y2), Mathf.Max(x1, x2), Mathf.Max(y1, y2));
+                        var x1 = dets[indices[i] * 4] / 320F;
+                        var y1 =  dets[indices[i] * 4 + 1] / 320F;
+                        var x2 = dets[indices[i] * 4 + 2] / 320F;
+                        var y2 =  dets[indices[i] * 4 + 3] / 320F;
+                        Debug.Log("x1: " + x1 + " y1: " + y1 + " x2: " + x2 + " y2: " + y2);
+                        var finalRect = new Rect(x1 * rect.width, y1 * rect.height, (x2 - x1) * rect.width, (y2 - y1) * rect.height);
                         m_debugRect.anchoredPosition = finalRect.center;
                         m_debugRect.sizeDelta = finalRect.size;
                     }

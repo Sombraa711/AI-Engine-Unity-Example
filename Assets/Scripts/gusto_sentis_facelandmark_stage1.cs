@@ -17,7 +17,6 @@ public class gusto_sentis_facelandmark : MonoBehaviour
 {    
     // public ModelAsset modelAsset;
     Model runtimeModel;
-    public ModelAsset modelAsset;
     List<Model.Output> output;
     float[,] anchors;
     Worker worker;
@@ -79,7 +78,8 @@ public class gusto_sentis_facelandmark : MonoBehaviour
         inputTensor = new Tensor<float>(new TensorShape(1, 128, 128, 3));
         // Debug.Log($"modelAssets: {(modelAsset != null ? modelAsset.name : "<NULL>")}");
 
-        runtimeModel = ModelLoader.Load(modelAsset);
+        // runtimeModel = ModelLoader.Load(modelAsset);
+        runtimeModel = ModelLoader.Load(Gusto.Utility.retrieve_streamingassets_data("Weights/face_detector.sentis"));
         string anchors_bin_file = Gusto.Utility.retrieve_streamingassets_data("anchor.bin");
 
         anchors = Gusto.Utility.LoadBinaryFile2D(anchors_bin_file, 896, 4);
@@ -201,9 +201,9 @@ public class gusto_sentis_facelandmark : MonoBehaviour
                 // print("num_detections: " + num_detections[0]);
                 for (int i = 0; i < num_detections[0]; i++)
                 {
-                    // Debug.Log("scores: " + scores[indices[i]]);
+                    Debug.Log("scores: " + scores[indices[i]]);
                     // 0-1 base
-                    // Debug.Log("detection decoded_boxes: " + decoded_boxes[indices[i], 0] + " " + decoded_boxes[indices[i], 1] + " " + decoded_boxes[indices[i], 2] + " " + decoded_boxes[indices[i], 3]);
+                    Debug.Log("detection decoded_boxes: " + decoded_boxes[indices[i], 0] + " " + decoded_boxes[indices[i], 1] + " " + decoded_boxes[indices[i], 2] + " " + decoded_boxes[indices[i], 3]);
                     
                     
                     // var x1 = Mathf.Lerp(rect.xMin, rect.xMax, decoded_boxes[indices[i], 0]);
