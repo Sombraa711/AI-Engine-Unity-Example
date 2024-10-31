@@ -39,6 +39,7 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
     
     [SerializeField] RectTransform m_debugRect;
     [SerializeField] RawImage m_rawImage;
+    [SerializeField] Text annotationText;
 
     void OnGUI ()
     {
@@ -178,6 +179,17 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
                 // Debug.Log("valid index: " + indices[0]);
                 for (int i = 0; i < num_detections[0]; i++)
                 {
+                    var class_mapper = new Dictionary<int, string>
+                    {
+                        { 0, "Bruni" },
+                        { 1, "Elsa" },
+                        { 2, "Anna" },
+                    };
+                    var cls = indices_cls[i];
+                    if (class_mapper.TryGetValue(cls, out string value))
+                    {
+                        annotationText.text = value;
+                    }
                     // Debug.Log($"dets: {dets[indices[i] * 4]} {dets[indices[i] * 4 + 1]} {dets[indices[i] * 4 + 2]} {dets[indices[i] * 4 + 3]}");
                     var minX = dets[indices[i] * 4] * w_ratio;
                     var minY = dets[indices[i] * 4 + 1] * h_ratio;
@@ -190,7 +202,7 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
                     var y2 = Mathf.Lerp(rect.yMin, rect.yMax, maxY);
                     var finalRect = new Rect(x1, y1, x2 - x1, y2 - y1);
                     Debug.Log($"finalRect: {finalRect}");
-                    m_debugRect.anchoredPosition = finalRect.center;
+                    m_debugRect.anchoredPosition = new Vector2(finalRect.center.x, -finalRect.center.y);
                     m_debugRect.sizeDelta = finalRect.size;
                 }
                 inferencePending = false;
