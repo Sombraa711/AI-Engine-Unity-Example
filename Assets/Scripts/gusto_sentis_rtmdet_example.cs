@@ -53,6 +53,7 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
         Application.targetFrameRate = 60;
     }
 
+
     void Start()
     {
         Debug.Log("Running Platform: " + Application.platform);
@@ -87,7 +88,7 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
         rtmdet_transformer = rtmdet_transformer.SetChannelSwizzle(ChannelSwizzle.BGRA).SetDimensions(320, 320, 3);
 
 
-        runtimeModel = ModelLoader.Load(Gusto.Utility.retrieve_streamingassets_data("Weights/rtmdet_t_v7_20241028.sentis"));
+        runtimeModel = ModelLoader.Load(Gusto.Utility.retrieve_streamingassets_data("Weights/rtmdet_t_v7_20241028_preprocessor.sentis"));
         output = runtimeModel.outputs;
 
         for (int i = 0; i < output.Count; i++)
@@ -123,8 +124,7 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
         {
     
             TextureConverter.ToTensor(m_webCamTexture, inputTensor, rtmdet_transformer);
-            var inputarray = inputTensor.ReadbackAndClone();
-            // Debug.Log("inputTensor: " + inputarray[0] + " " + inputarray[1] + " " + inputarray[2] + " " + inputarray[3]);
+
             start_time = Time.realtimeSinceStartup;
             worker.Schedule(inputTensor);
 
