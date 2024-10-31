@@ -82,7 +82,7 @@ public class GustoSentisRtmdetTest : MonoBehaviour
         // Debug.Log($"modelAssets: {(modelAsset != null ? modelAsset.name : "<NULL>")}");
         // runtimeModel = ModelLoader.Load(modelAsset);
 
-        runtimeModel = ModelLoader.Load(Gusto.Utility.retrieve_streamingassets_data("Weights/rtmdet_t_v7_20241028.sentis"));
+        runtimeModel = ModelLoader.Load(Gusto.Utility.retrieve_streamingassets_data("Weights/rtmdet_t_v7_20241028_preprocessor.sentis"));
         output = runtimeModel.outputs;
 
         for (int i = 0; i < output.Count; i++)
@@ -90,7 +90,7 @@ public class GustoSentisRtmdetTest : MonoBehaviour
             Debug.Log("output: " + output[i].name);
         }
         Debug.Log("output: " + output);
-        worker = new Worker(runtimeModel, BackendType.GPUCompute);
+        worker = new Worker(runtimeModel, BackendType.CPU);
     }
 
     async UniTaskVoid AsyncLoop()
