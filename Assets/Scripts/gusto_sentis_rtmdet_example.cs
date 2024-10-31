@@ -162,21 +162,26 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
                 int[] indices_cls = new int[100 * dets_shape[0]];
                 int[] num_detections = new int[dets_shape[0]];
                 nms(dets, dets_shape, scores, scores_shape, 0.5f, 0.5f, indices, indices_cls, num_detections);
-
-                Debug.Log("num_detections: " + num_detections[0]);
-                Debug.Log("valid index: " + indices[0]);
+                // Debug.Log("max_score: " + scores.Max());
+                // Debug.Log("max_score pos: " + Array.IndexOf(scores, scores.Max()));
+                // Debug.Log("num_detections: " + num_detections[0]);
+                // Debug.Log("valid index: " + indices[0]);
                 for (int i = 0; i < num_detections[0]; i++)
                 {
-                    Debug.Log($"dets: {dets[indices[i] * 4]} {dets[indices[i] * 4 + 1]} {dets[indices[i] * 4 + 2]} {dets[indices[i] * 4 + 3]}");
-                    Debug.Log($"dets rescaled: {dets[indices[i] * 4] * w_ratio} {dets[indices[i] * 4 + 1] * h_ratio} {dets[indices[i] * 4 + 2] * w_ratio} {dets[indices[i] * 4 + 3] * h_ratio}");
-                    // var x1 = Mathf.Lerp(rect.xMin, rect.xMax, dets[indices[i] * 4] * w_ratio);
-                    // var y1 = Mathf.Lerp(rect.yMin, rect.yMax, dets[indices[i] * 4 + 1] * h_ratio);
-                    // var x2 = Mathf.Lerp(rect.xMin, rect.xMax, dets[indices[i] * 4 + 2] * w_ratio);
-                    // var y2 = Mathf.Lerp(rect.yMin, rect.yMax, dets[indices[i] * 4 + 3] * h_ratio);
-                    // Debug.Log("x1: " + x1 + " y1: " + y1 + " x2: " + x2 + " y2: " + y2);
-                    // var finalRect = Rect.MinMaxRect(Mathf.Min(x1, x2), Mathf.Min(y1, y2), Mathf.Max(x1, x2), Mathf.Max(y1, y2));
-                    // m_debugRect.anchoredPosition = finalRect.center;
-                    // m_debugRect.sizeDelta = finalRect.size;
+                    // Debug.Log($"dets: {dets[indices[i] * 4]} {dets[indices[i] * 4 + 1]} {dets[indices[i] * 4 + 2]} {dets[indices[i] * 4 + 3]}");
+                    var minX = dets[indices[i] * 4] * w_ratio;
+                    var minY = dets[indices[i] * 4 + 1] * h_ratio;
+                    var maxX =dets[indices[i] * 4 + 2] * w_ratio;
+                    var maxY = dets[indices[i] * 4 + 3] * h_ratio;
+                    Debug.Log($"minX: {minX} minY: {minY} maxX: {maxX} maxY: {maxY}");
+                    var x1 = Mathf.Lerp(rect.xMin, rect.xMax, minX);
+                    var y1 = Mathf.Lerp(rect.yMin, rect.yMax, minY);
+                    var x2 = Mathf.Lerp(rect.xMin, rect.xMax, maxX);
+                    var y2 = Mathf.Lerp(rect.yMin, rect.yMax, maxY);
+                    var finalRect = new Rect(x1, y1, x2 - x1, y2 - y1);
+                    Debug.Log($"finalRect: {finalRect}");
+                    m_debugRect.anchoredPosition = finalRect.center;
+                    m_debugRect.sizeDelta = finalRect.size;
                 }
                 inferencePending = false;
                 outputTensors.Clear(); 

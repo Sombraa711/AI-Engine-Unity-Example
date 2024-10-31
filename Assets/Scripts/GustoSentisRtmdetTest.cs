@@ -33,6 +33,9 @@ public class GustoSentisRtmdetTest : MonoBehaviour
 
     [SerializeField] RectTransform m_debugRect;
     [SerializeField] RawImage m_rawImage;
+    
+    float h_ratio = 1 / 320.0f;
+    float w_ratio = 1 / 320.0f;
 
     void OnGUI()
     {
@@ -116,16 +119,22 @@ public class GustoSentisRtmdetTest : MonoBehaviour
                 {
                     nms(detsArray, dets_shape, scoresArray, scores_shape, 0.5f, 0.5f, indices, indices_cls, num_detections);
 
-                    Debug.Log("num_detections: " + num_detections[0]);
-                    Debug.Log("valid index: " + indices[0]);
+                    // Debug.Log("num_detections: " + num_detections[0]);
+                    // Debug.Log("valid index: " + indices[0]);
                     for (int i = 0; i < num_detections[0]; i++)
                     {
-                        var x1 = dets[indices[i] * 4] / 320F;
-                        var y1 =  dets[indices[i] * 4 + 1] / 320F;
-                        var x2 = dets[indices[i] * 4 + 2] / 320F;
-                        var y2 =  dets[indices[i] * 4 + 3] / 320F;
-                        Debug.Log("x1: " + x1 + " y1: " + y1 + " x2: " + x2 + " y2: " + y2);
-                        var finalRect = new Rect(x1 * rect.width, y1 * rect.height, (x2 - x1) * rect.width, (y2 - y1) * rect.height);
+                        // Debug.Log($"dets: {dets[indices[i] * 4]} {dets[indices[i] * 4 + 1]} {dets[indices[i] * 4 + 2]} {dets[indices[i] * 4 + 3]}");
+                        var minX = dets[indices[i] * 4] * w_ratio;
+                        var minY = dets[indices[i] * 4 + 1] * h_ratio;
+                        var maxX =dets[indices[i] * 4 + 2] * w_ratio;
+                        var maxY = dets[indices[i] * 4 + 3] * h_ratio;
+                        Debug.Log($"minX: {minX} minY: {minY} maxX: {maxX} maxY: {maxY}");
+                        var x1 = Mathf.Lerp(rect.xMin, rect.xMax, minX);
+                        var y1 = Mathf.Lerp(rect.yMin, rect.yMax, minY);
+                        var x2 = Mathf.Lerp(rect.xMin, rect.xMax, maxX);
+                        var y2 = Mathf.Lerp(rect.yMin, rect.yMax, maxY);
+                        var finalRect = new Rect(x1, y1, x2 - x1, y2 - y1);
+                        Debug.Log($"finalRect: {finalRect}");
                         m_debugRect.anchoredPosition = finalRect.center;
                         m_debugRect.sizeDelta = finalRect.size;
                     }
