@@ -10,6 +10,8 @@ using System.Linq;
 using Gusto;
 using Unity.Sentis;
 using UnityEngine.UIElements;
+using Cysharp.Threading.Tasks;
+using System.Security.Principal;
 
 
 public class gusto_sentis_rtmdet_example : MonoBehaviour
@@ -22,6 +24,8 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
     List<Model.Output> output;
     Worker worker;
     Tensor<float> inputTensor;
+
+    TextureTransform rtmdet_transformer = new TextureTransform();
     float measure_time;
     float max_det_time;
     float min_det_time = 1000.0f;
@@ -79,6 +83,9 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
         // Debug.Log($"modelAssets: {(modelAsset != null ? modelAsset.name : "<NULL>")}");
         // runtimeModel = ModelLoader.Load(modelAsset);
         
+        rtmdet_transformer = rtmdet_transformer.SetChannelSwizzle(ChannelSwizzle.BGRA).SetDimensions(320, 320, 3);
+
+
         runtimeModel = ModelLoader.Load(Gusto.Utility.retrieve_streamingassets_data("Weights/rtmdet_t_v7_20241028.sentis"));
         output = runtimeModel.outputs;
 
@@ -93,6 +100,8 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
     List<Tensor<float>> outputTensors = new List<Tensor<float>>();
     float start_time = 0.0f;
     float end_time = 0.0f;
+
+
 
     void Update()
     {
@@ -112,8 +121,9 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
         if (!inferencePending)
         {
     
-            TextureConverter.ToTensor(m_webCamTexture, inputTensor, new TextureTransform());
-
+            TextureConverter.ToTensor(m_webCamTexture, inputTensor, rtmdet_transformer);
+            var inputarray = inputTensor.ReadbackAndClone();
+            // Debug.Log("inputTensor: " + inputarray[0] + " " + inputarray[1] + " " + inputarray[2] + " " + inputarray[3]);
             start_time = Time.realtimeSinceStartup;
             worker.Schedule(inputTensor);
 
