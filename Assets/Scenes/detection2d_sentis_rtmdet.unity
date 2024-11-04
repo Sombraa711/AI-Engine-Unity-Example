@@ -492,6 +492,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7453e6789bd864b0da4eaaf85e7f0519, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  modelAsset: {fileID: 5022602860645237092, guid: f110a48d1bd3461338aa095742cc04d7, type: 3}
   m_debugRect: {fileID: 1194039351}
   m_rawImage: {fileID: 1828601337}
   annotationText: {fileID: 1339612605}

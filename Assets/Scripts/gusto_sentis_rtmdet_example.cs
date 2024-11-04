@@ -17,9 +17,9 @@ using System.Security.Principal;
 public class gusto_sentis_rtmdet_example : MonoBehaviour
 {    
 
-    [DllImport("nms")]
-    public static extern void nms(float[] boxes, int [] boxes_shape, float[] scores, int [] scores_shape, float scoreThr, float nmsThr, int[] indices, int[] indices_cls, int[] num_detections);
-    // public ModelAsset modelAsset;
+    // [DllImport("__Internal")]
+    // public static extern void nms(float[] boxes, int [] boxes_shape, float[] scores, int [] scores_shape, float scoreThr, float nmsThr, int[] indices, int[] indices_cls, int[] num_detections);
+    public ModelAsset modelAsset;
     Model runtimeModel;
     List<Model.Output> output;
     Worker worker;
@@ -88,7 +88,8 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
         rtmdet_transformer = rtmdet_transformer.SetChannelSwizzle(ChannelSwizzle.BGRA).SetDimensions(320, 320, 3);
 
 
-        runtimeModel = ModelLoader.Load(Gusto.Utility.retrieve_streamingassets_data("Weights/rtmdet_t_v7_20241028_preprocessor.sentis"));
+        runtimeModel = ModelLoader.Load(modelAsset);
+        // runtimeModel = ModelLoader.Load(Application.streamingAssetsPath + ("/Weights/rtmdet_t_v7_20241028_preprocessor.sentis"));
         output = runtimeModel.outputs;
 
         for (int i = 0; i < output.Count; i++)
@@ -172,7 +173,7 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
                 int[] indices = new int[100 * dets_shape[0]];
                 int[] indices_cls = new int[100 * dets_shape[0]];
                 int[] num_detections = new int[dets_shape[0]];
-                nms(dets, dets_shape, scores, scores_shape, 0.5f, 0.5f, indices, indices_cls, num_detections);
+                Gusto.Utility.nms(dets, dets_shape, scores, scores_shape, 0.5f, 0.5f, indices, indices_cls, num_detections);
                 // Debug.Log("max_score: " + scores.Max());
                 // Debug.Log("max_score pos: " + Array.IndexOf(scores, scores.Max()));
                 // Debug.Log("num_detections: " + num_detections[0]);
