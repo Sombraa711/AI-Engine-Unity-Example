@@ -16,7 +16,6 @@ namespace Gusto
 
         internal enum ErrorType
         {
-
             OK = 0x00000000,
 
             #region General
@@ -32,6 +31,8 @@ namespace Gusto
             GeneralInvalidParameter = -(GeneralError | 0x00000004),
 
             GeneralNotSupport       = -(GeneralError | 0x00000005),
+
+            PARTIAL_FAIL = 0x76000001,
 
             #endregion
 

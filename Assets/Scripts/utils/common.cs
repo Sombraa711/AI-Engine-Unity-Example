@@ -1,17 +1,19 @@
 using System;
 using System.IO;
+using System.Text;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UI;
-
 namespace Gusto
 {
     internal sealed partial class Utility
         {
         #if UNITY_IOS && !UNITY_EDITOR
-        const string DLL_NAME = "__Internal";
+        const string NMS_DLL_NAME = "__Internal";
+        const string FACE_DLL_NAME = "__Internal";
         #else
-        const string DLL_NAME = "nms";
+        const string NMS_DLL_NAME = "nms";
+        const string FACE_DLL_NAME = "face_geometry";
         #endif
 
         public static string retrieve_streamingassets_data(string rel_path_to_streamingassets)
@@ -83,11 +85,20 @@ namespace Gusto
 
         // IF IOS: __Internal
         // IF ANDROID: nms
-        [DllImport(DLL_NAME)]
+        [DllImport(NMS_DLL_NAME)]
         public static extern void nms(float[] boxes, int [] boxes_shape, float[] scores, int [] scores_shape, float scoreThr, float nmsThr, int[] indices, int[] indices_cls, int[] num_detections);
         
-        [DllImport(DLL_NAME)]
+        [DllImport(NMS_DLL_NAME)]
         public static extern void nms_with_sigmoid(float[] boxes, int [] boxes_shape, float[] scores, int [] scores_shape, float scoreThr, float nmsThr, int[] indices, int[] indices_cls, int[] num_detections);
+        
+        [DllImport(FACE_DLL_NAME)]
+        public static extern ErrorType face_mesh_calculator_new(out IntPtr calculator);
+        [DllImport(FACE_DLL_NAME)]
+        public static extern ErrorType face_mesh_calculator_open(IntPtr net, StringBuilder MetaDataPath, int buffer_size);
+        
+        [DllImport(FACE_DLL_NAME)]
+        public static extern ErrorType face_mesh_calculator_process(IntPtr calculator, int image_width, int image_height, float[, ] multi_face_landmarks, int num_faces, float[] face_geometry_pose_mat);    
+
     }
 
 }

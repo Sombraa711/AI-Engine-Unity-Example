@@ -15,12 +15,15 @@ using TMPro;
 
 public class gusto_sentis_facelandmark_stage2 : MonoBehaviour
 {    
+    public GameObject cube_object;
     // public ModelAsset modelAsset;
     Model runtimeModel;
     List<Model.Output> output;
     float[,] anchors;
     Worker worker;
     Tensor<float> inputTensor;
+
+    public IntPtr face_geometry_calculator;
     float measure_time;
     float max_det_time;
     float min_det_time = 1000.0f;
@@ -72,6 +75,7 @@ public class gusto_sentis_facelandmark_stage2 : MonoBehaviour
             }
         }
 
+
         m_webCamTexture = new WebCamTexture();
 
         m_webCamTexture.Play(); //Start capturing image using webcam
@@ -88,11 +92,18 @@ public class gusto_sentis_facelandmark_stage2 : MonoBehaviour
         }
         Debug.Log("output: " + output);
         worker = new Worker(runtimeModel, BackendType.CPU);
+
+        Gusto.Utility.face_mesh_calculator_new(out face_geometry_calculator);
+        StringBuilder sb = new StringBuilder(1024);
+        sb.Append(Gusto.Utility.retrieve_streamingassets_data("geometry_pipeline_metadata_including_iris_landmarks.json"));
+        Gusto.Utility.face_mesh_calculator_open(face_geometry_calculator, sb, 1024);
+        
     }
     bool inferencePending = false;
     List<Tensor<float>> outputTensors = new List<Tensor<float>>();
     float start_time = 0.0f;
     float end_time = 0.0f;
+    Matrix4x4 face_pose = new Matrix4x4();
 
     void Update()
     {
@@ -134,6 +145,7 @@ public class gusto_sentis_facelandmark_stage2 : MonoBehaviour
             }
             inferencePending = true;
         }
+        RenderTexture.ReleaseTemporary(m_tempRenderTexture);
 
         if (inferencePending) 
         {
@@ -177,6 +189,37 @@ public class gusto_sentis_facelandmark_stage2 : MonoBehaviour
                     face_points[i, 1] = dets[i * 3 + 1];
                     face_points[i, 2] = dets[i * 3 + 2];
                 }
+                float [] pose = new float[16];
+                Gusto.Utility.ErrorType FaceMeshStatus = Gusto.Utility.face_mesh_calculator_process(face_geometry_calculator, m_webCamTexture.width, m_webCamTexture.height, face_points, 1, pose);
+                if (FaceMeshStatus == Gusto.Utility.ErrorType.OK){
+                    Debug.Log("FaceMeshStatus: " + FaceMeshStatus);
+                    for (int i = 0; i < 16; i++){
+                        print($"Pose: {i} {pose[i]}");
+                    }
+                }
+
+                //convert pose to Martix4x4
+                face_pose.m00 = pose[0];
+                face_pose.m01 = pose[1];
+                face_pose.m02 = pose[2];
+                face_pose.m03 = pose[3];
+                face_pose.m10 = pose[4];
+                face_pose.m11 = pose[5];
+                face_pose.m12 = pose[6];
+                face_pose.m13 = pose[7];
+                face_pose.m20 = pose[8];
+                face_pose.m21 = pose[9];
+                face_pose.m22 = pose[10];
+                face_pose.m23 = pose[11];
+                face_pose.m30 = pose[12];
+                face_pose.m31 = pose[13];
+                face_pose.m32 = pose[14];
+                face_pose.m33 = pose[15];
+                //
+                cube_object.transform.rotation = face_pose.rotation;
+                cube_object.transform.position = face_pose.GetColumn(3);
+
+
                 inferencePending = false;
                 outputTensors.Clear(); 
 
@@ -189,7 +232,6 @@ public class gusto_sentis_facelandmark_stage2 : MonoBehaviour
         }
         frame_count += 1;
 
-        
 
     }
 
