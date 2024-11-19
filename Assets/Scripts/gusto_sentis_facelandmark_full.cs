@@ -119,8 +119,10 @@ public class gusto_sentis_facelandmark : MonoBehaviour
                     var landmarks = output_landmark.landmarks;
                     var scores = output_landmark.score;
                     var face_pose = output_landmark.pose;
-                    cube_object.transform.rotation = face_pose.rotation;
-                    cube_object.transform.position = face_pose.GetColumn(3);
+                    if (i == 0){
+                        cube_object.transform.rotation = face_pose.rotation;
+                        cube_object.transform.position = face_pose.GetColumn(3);
+                    }
                     Debug.Log("landmarks: " + landmarks + " scores: " + scores + " face_pose: " + face_pose);
 
                 }

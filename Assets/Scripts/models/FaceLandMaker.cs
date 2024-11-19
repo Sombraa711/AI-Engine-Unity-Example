@@ -147,6 +147,9 @@ namespace Gusto{
         private IntPtr face_geometry_calculator;
         private int calculator_frame_width;
         private int calculator_frame_height;
+        private float x_bias;
+        private float y_bias;
+        private bool bias_lock;
         public void LoadModel(string modelPath, string face_mesh_metadata_path){
             base.LoadModel(modelPath);
             texture_transformer = new TextureTransform();
@@ -168,7 +171,11 @@ namespace Gusto{
             int y = Math.Max((int)((bbox.y - 0.125 * bbox.height) * texture.height), 0);
             int width = Math.Max((int)(bbox.width * texture.width * 1.25), texture.width - x);
             int height = Math.Max((int)(bbox.height * texture.height), texture.height - y); 
-
+            
+            x_bias = x;
+            y_bias = y;
+            bias_lock = true;
+            
             Texture2D croppedTexture = new Texture2D(width, height);
             Color[] pixels = texture.GetPixels(x, y, width, height);
             croppedTexture.SetPixels(pixels);
@@ -195,12 +202,15 @@ namespace Gusto{
 
 
             for (int i = 0; i < dets_shape[0] * dets_shape[1] * dets_shape[2] * dets_shape[3] / 3; i++){
-                landmarks[i, 0] = dets[i * 3];
-                landmarks[i, 1] = dets[i * 3 + 1];
-                landmarks[i, 2] = dets[i * 3 + 2];
+                var scale = 2 * (float)Math.Sqrt(calculator_frame_width / 1000);
+                landmarks[i, 0] = (dets[i * 3] + x_bias) / calculator_frame_width;
+                landmarks[i, 1] = (dets[i * 3 + 1] + y_bias) / calculator_frame_height;
+                // landmarks[i, 2] = -dets[i * 3 + 2] / 500 * (float)scale;
+                landmarks[i, 2] = dets[i * 3 + 2] / 500;
             }
             float [] pose = new float[16];
             Utility.ErrorType FaceMeshStatus = Utility.face_mesh_calculator_process(face_geometry_calculator, calculator_frame_width, calculator_frame_height, landmarks, 1, pose);
+            // Utility.ErrorType FaceMeshStatus = Utility.face_mesh_calculator_process(face_geometry_calculator, 256, 256, landmarks, 1, pose);
             
             if (FaceMeshStatus == Utility.ErrorType.OK || FaceMeshStatus == Utility.ErrorType.PARTIAL_FAIL)
             {
