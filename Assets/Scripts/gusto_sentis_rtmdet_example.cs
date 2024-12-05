@@ -32,6 +32,7 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
     float total_det_time;
     int frame_count = 1;
 
+    int input_size = 300;
     bool has_det = false;
     WebCamTexture m_webCamTexture;
     WebCamDevice[] m_devices;
@@ -80,12 +81,14 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
 
         m_webCamTexture = new WebCamTexture();
 
+        
+
         m_webCamTexture.Play(); //Start capturing image using webcam
-        inputTensor = new Tensor<float>(new TensorShape(1, 3, 320, 320));
+        inputTensor = new Tensor<float>(new TensorShape(1, 3, input_size, input_size));
         // Debug.Log($"modelAssets: {(modelAsset != null ? modelAsset.name : "<NULL>")}");
         // runtimeModel = ModelLoader.Load(modelAsset);
         
-        rtmdet_transformer = rtmdet_transformer.SetChannelSwizzle(ChannelSwizzle.BGRA).SetDimensions(320, 320, 3);
+        rtmdet_transformer = rtmdet_transformer.SetChannelSwizzle(ChannelSwizzle.BGRA).SetDimensions(input_size, input_size, 3);
 
 
         runtimeModel = ModelLoader.Load(modelAsset);
@@ -116,8 +119,8 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
         var rect = m_rawImage.rectTransform.rect;
         m_rawImage.texture = m_webCamTexture; //display the image on the RawImage
 
-        float h_ratio = 1 / 320.0f;
-        float w_ratio = 1 / 320.0f;
+        float h_ratio = 1 / (float)input_size;
+        float w_ratio = 1 / (float)input_size;
 
 
 
@@ -127,6 +130,8 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
             TextureConverter.ToTensor(m_webCamTexture, inputTensor, rtmdet_transformer);
 
             start_time = Time.realtimeSinceStartup;
+            frame_count += 1;
+
             worker.Schedule(inputTensor);
 
             for (int i = 0; i < output.Count; i++)
@@ -159,9 +164,11 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
                     if (output[i].name == "dets"){
                         dets = outputTensors[i].DownloadToArray();
                         dets_shape = outputTensors[i].shape.ToArray();
+                        Debug.Log("dets_shape: " + dets_shape[0] + " " + dets_shape[1] + " " + dets_shape[2]);
                     }else if (output[i].name == "labels"){
                         scores = outputTensors[i].DownloadToArray();
                         scores_shape = outputTensors[i].shape.ToArray();
+                        Debug.Log("scores_shape: " + scores_shape[0] + " " + scores_shape[1] + " " + scores_shape[2]);
                     }
 
                 }else{
@@ -216,7 +223,6 @@ public class gusto_sentis_rtmdet_example : MonoBehaviour
                 total_det_time += measure_time;
             }
         }
-        frame_count += 1;
 
         
 

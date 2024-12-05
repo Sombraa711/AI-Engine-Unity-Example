@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Gusto;
 
-public class gusto_opencv_example : MonoBehaviour
+public class gusto_det2d_android_example : MonoBehaviour
 {    
     #if UNITY_IOS && !UNITY_EDITOR
         const string libface_geometry_example_mobile = "__Internal";
