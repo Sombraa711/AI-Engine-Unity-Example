@@ -1,0 +1,28 @@
+{
+    "model_name": "rtm-tiny",
+    "result_type": "detection",
+    "input_size": {
+        "height": 320,
+        "width": 320,
+        "channels": 3
+    },
+    "classes": [
+        "Bruni",
+        "Elsa",
+        "Anna"
+    ],
+    "Preprocessing": {
+        "DIM_ORDER": "NCHW",
+        "CHANNEL_ORDER": "BGR",
+        "MEAN": [
+            127.5,
+            127.5,
+            127.5
+        ],
+        "STD": [
+            127.5,
+            127.5,
+            127.5
+        ]
+    }
+}

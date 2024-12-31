@@ -9,39 +9,40 @@ using Gusto;
 
 public class gusto_opencv_example : MonoBehaviour
 {    
-    #if UNITY_IOS && !UNITY_EDITOR
-        const string libdet2d = "__Internal";
-    #else
-        const string libdet2d = "libdetection_csharp_example";
-    #endif
-    [DllImport(libdet2d)]
-    public static extern void Open_Session(
-        StringBuilder _detector_path,
-        int input_w,
-        int input_h
-    );
-    [DllImport(libdet2d)]
-    public static extern void Start_Session(
-        StringBuilder _frame_path
-    );
+    float measure_time;
+    float max_det_time;
+    float min_det_time = 1000.0f;
+    float total_det_time;
+    int frame_count = 1;
+    float start_time = 0.0f;
+    float end_time = 0.0f;
+    public IntPtr _net;
+
+    void OnGUI()
+    {
+        GUI.Label(new Rect(15, 125, 450, 100), "Running Platform: " + Application.platform);
+        GUI.Label(new Rect(15, 150, 450, 100), "Time Estimation(ms): " + measure_time);
+        GUI.Label(new Rect(15, 175, 450, 100), "Avg / Min / Max: " + total_det_time / frame_count + " / " + min_det_time + " / " + max_det_time);
+    }
     void Start()
     {
-        StringBuilder face_detector_path = new StringBuilder(Gusto.Utility.retrieve_streamingassets_data("Weights/epoch_150_nonms_fp16.onnx"));
         
-        // uint8 may be slower than fp16 since some of cpus from mobile devices do not support uint8
-        // StringBuilder face_detector_path = new StringBuilder(Gusto.Utility.retrieve_streamingassets_data("Weights/epoch_150_nonms_uint8.onnx"));
-
-        // StringBuilder _detector_path = new StringBuilder(Gusto.Utility.retrieve_streamingassets_data("Weights/rtmdet_t_v7_20241028_preprocessor.onnx"));
-        Open_Session(
-            face_detector_path,
-            320,
-            320
-        );
-
+        string model_path = Gusto.Utility.retrieve_streamingassets_data("gusto_engine_test/end2end_nonms_fp16.onnx");
+        string config_path = Gusto.Utility.retrieve_streamingassets_data("gusto_engine_test/base_model_config.json");
+        Gusto.GustoNet.Gusto_Model_Compile(out _net, model_path, config_path);
     }
     void Update()
     {
-        StringBuilder frame_path = new StringBuilder(Gusto.Utility.retrieve_streamingassets_data("gusto_engine_test/demo.png"));
-        Start_Session(frame_path);
+        string ImagePath = Gusto.Utility.retrieve_streamingassets_data("gusto_engine_test/demo.png");
+
+        start_time = Time.realtimeSinceStartup;
+        Gusto.GustoNet.Gusto_Model_Inference_Image(_net, ImagePath);
+        end_time = Time.realtimeSinceStartup;
+        measure_time = (end_time - start_time) * 1000.0f;
+        min_det_time = Math.Min(min_det_time, measure_time);
+        max_det_time = Math.Max(max_det_time, measure_time);
+        total_det_time += measure_time;
+        frame_count++;
     }
+
 }

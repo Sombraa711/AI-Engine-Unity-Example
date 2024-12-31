@@ -1,0 +1,87 @@
+[
+    {
+        "model_name": "rtm-tiny",
+        "result_type": "detection",
+        "input_size": {
+            "height": 320,
+            "width": 320,
+            "channels": 3
+        },
+        "classes": [
+            "Bruni",
+            "Elsa",
+            "Anna"
+        ],
+        "Preprocessing": {
+            "DIM_ORDER": "NCHW",
+            "CHANNEL_ORDER": "BGR",
+            "MEAN": [
+                127.5,
+                127.5,
+                127.5
+            ],
+            "STD": [
+                127.5,
+                127.5,
+                127.5
+            ]
+        }
+    },
+
+    {
+        "model_name": "face_detector_mediapipe",
+        "result_type": "mp_detection",
+        "input_size": {
+            "height": 128,
+            "width": 128,
+            "channels": 3
+        },
+        "classes": [
+            "Face"
+        ],
+        "Preprocessing": {
+            "DIM_ORDER": "NHWC",
+            "CHANNEL_ORDER": "RGB",
+            "MEAN": [
+                127.5,
+                127.5,
+                127.5
+            ],
+            "STD": [
+                127.5,
+                127.5,
+                127.5
+            ]
+        }
+    },
+
+    {
+        "model_name": "face_landmark_mediapipe",
+        "result_type": "mp_keypoint",
+        "input_size": {
+            "height": 256,
+            "width": 256,
+            "channels": 3
+        },
+        "classes": [
+            "Face"
+        ],
+        "Preprocessing": {
+            "DIM_ORDER": "NHWC",
+            "CHANNEL_ORDER": "RGB",
+            "MEAN": [
+                127.5,
+                127.5,
+                127.5
+            ],
+            "STD": [
+                127.5,
+                127.5,
+                127.5
+            ]
+        }
+    }
+
+
+
+]
