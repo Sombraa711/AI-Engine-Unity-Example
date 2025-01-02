@@ -22,8 +22,8 @@ public class GustoEngineUnityTest : MonoBehaviour
     void OnGUI()
     {
         GUI.Label(new Rect(15, 125, 450, 100), "Running Platform: " + Application.platform);
-        GUI.Label(new Rect(15, 150, 450, 100), "Time Estimation(ms): " + measure_time);
-        GUI.Label(new Rect(15, 175, 450, 100), "Avg / Min / Max: " + total_det_time / frame_count + " / " + min_det_time + " / " + max_det_time);
+        GUI.Label(new Rect(15, 150, 450, 100), "Time Estimation(ms): " + (int)measure_time);
+        GUI.Label(new Rect(15, 175, 450, 100), "Avg / Min / Max: " + (int)total_det_time / frame_count + " / " + (int)min_det_time + " / " + (int)max_det_time);
     }
     void Start()
     {

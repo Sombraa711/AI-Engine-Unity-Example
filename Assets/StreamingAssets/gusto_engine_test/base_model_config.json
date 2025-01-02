@@ -1,5 +1,6 @@
 {
     "model_name": "rtm-tiny",
+    "execution_provider": "CPU",
     "result_type": "detection",
     "input_size": {
         "height": 320,
