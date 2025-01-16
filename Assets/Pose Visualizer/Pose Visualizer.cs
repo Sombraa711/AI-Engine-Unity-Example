@@ -152,17 +152,20 @@ public class PoseVisualizer : MonoBehaviour
         
 
         // rotate
-        var matrix3 = matrix2 * Matrix4x4.Rotate(Quaternion.Euler(0, 180, 0));
+        var matrix3 = matrix2 * Matrix4x4.Rotate(Quaternion.Euler(180, 180, 0));
         // matrix3 *= Matrix4x4.Rotate(Quaternion.Euler(matrix3.rotation.x * -1f, 0, 0));
 
-        // scale up by 50
-        // TODO: no hardcode
+        // scale -1 if needed
         // var matrix4 = matrix3 * Matrix4x4.Scale(new Vector3(-1f, -1f, -1f));
 
 
         Matrix4x4Extension.Decompose(matrix3, out translation, out rotation, out scale);
         
         rotation = Quaternion.Euler(new Vector3(-rotation.eulerAngles.x, rotation.eulerAngles.y, -rotation.eulerAngles.z));
+        
+        // for orthographic camera, scale headband using fov and z distance
+        var scaleRatio = Mathf.Tan(Mathf.Deg2Rad * 35f) / (matrix.m23 * Mathf.Tan(Mathf.Deg2Rad * 35f));
+        scale = new Vector3(scaleRatio, scaleRatio, scaleRatio);
 
         Instance._headbandTransform.position = new Vector3(matrix.m03 * Instance._screenRect.width,
             matrix.m13 * Instance._screenRect.height, matrix.m23);
