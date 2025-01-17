@@ -20,6 +20,9 @@ public class PoseVisualizer : MonoBehaviour
     [SerializeField]
     private RectTransform _screenTransform;
 
+    [SerializeField]
+    private bool debug_opengl = false;
+
     private Rect _screenRect;
 
     private static readonly float CAMERA_WIDTH = 800f;
@@ -30,6 +33,10 @@ public class PoseVisualizer : MonoBehaviour
     WebCamTexture webcamTexture;
     [SerializeField] RawImage m_rawImage;
     int _frameIndex = 0;
+    Matrix4x4 init_pose_;
+    bool IsTracking = false;
+    float InitThres = 0.8f;
+    float ReinitThres = 0.7f;
 
     // Start is called before the first frame update
     void Start()
@@ -59,7 +66,7 @@ public class PoseVisualizer : MonoBehaviour
         Debug.Log("Webcam texture height: " + webcamTexture.height);
         Debug.Log("Webcam texture width: " + webcamTexture.width);
         
-        Matrix4x4 init_pose_ = new Matrix4x4(
+        init_pose_ = new Matrix4x4(
             new Vector4(1f, 0f, 0f, 0f),
             new Vector4(0f, 0f, -1f, 0f),
             new Vector4(0f, -1f, 0f, 0f),
@@ -75,8 +82,8 @@ public class PoseVisualizer : MonoBehaviour
             "Bruni",
             Gusto.Utility.retrieve_streamingassets_data("Bruni-woband/Bruni-woband.obj"),
             Gusto.Utility.retrieve_streamingassets_data("Bruni-woband/cvs/Bruni-woband.meta"),
-            0.6f,
-            0.5f,
+            InitThres,
+            ReinitThres,
             init_pose
         );
 
@@ -96,32 +103,36 @@ public class PoseVisualizer : MonoBehaviour
         Color32[] pixels = webcamTexture.GetPixels32();
         GCHandle pixelsHandle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
         IntPtr pixelsPtr = pixelsHandle.AddrOfPinnedObject();
-        Gusto.ModelTarget.track(tracker, pixelsPtr, result_pose, confidences);
+        Gusto.ModelTarget.track(tracker, pixelsPtr, result_pose, confidences, debug_opengl);
+        pixelsHandle.Free();
+        // // Debug.Log("Confidence: " + confidences[0]);
+        // // Debug.Log($"result_pose = {result_pose[0]}, {result_pose[1]}, {result_pose[2]}, {result_pose[3]}");
+        // // Debug.Log($"result_pose = {result_pose[4]}, {result_pose[5]}, {result_pose[6]}, {result_pose[7]}");
+        // // Debug.Log($"result_pose = {result_pose[8]}, {result_pose[9]}, {result_pose[10]}, {result_pose[11]}");
+        // // Debug.Log($"result_pose = {result_pose[12]}, {result_pose[13]}, {result_pose[14]}, {result_pose[15]}");
 
-        // Debug.Log("Confidence: " + confidences[0]);
-        // Debug.Log($"result_pose = {result_pose[0]}, {result_pose[1]}, {result_pose[2]}, {result_pose[3]}");
-        // Debug.Log($"result_pose = {result_pose[4]}, {result_pose[5]}, {result_pose[6]}, {result_pose[7]}");
-        // Debug.Log($"result_pose = {result_pose[8]}, {result_pose[9]}, {result_pose[10]}, {result_pose[11]}");
-        // Debug.Log($"result_pose = {result_pose[12]}, {result_pose[13]}, {result_pose[14]}, {result_pose[15]}");
-        var output = "";
-        for (int i = 0; i < 16; i++)
-        {
-            output += result_pose[i] + ", ";
-            // Debug.Log(result_pose[i]);
+        // // var output = "";
+        // // for (int i = 0; i < 16; i++)
+        // // {
+        // //     output += result_pose[i] + ", ";
+        // //     // Debug.Log(result_pose[i]);
+        // // }
+        // // Debug.Log($"{output}");
+        Matrix4x4 sample = new Matrix4x4(
+            new Vector4(result_pose[0], result_pose[1], result_pose[2], result_pose[3]),
+            new Vector4(result_pose[4], result_pose[5], result_pose[6], result_pose[7]),
+            new Vector4(result_pose[8], result_pose[9], result_pose[10], result_pose[11]),
+            new Vector4(result_pose[12], result_pose[13], result_pose[14], result_pose[15])
+        );
+        UpdateOutput(sample);
+        
+        if (confidences[0] > InitThres){
+            IsTracking = true;
+        }else if (IsTracking && confidences[0] < ReinitThres){
+            IsTracking = false;
+            UpdateOutput(init_pose_);
+            Gusto.ModelTarget.reinit(tracker);
         }
-        Debug.Log($"{output}");
-        if (confidences[0] > 0.8){
-            Matrix4x4 sample = new Matrix4x4(
-                new Vector4(result_pose[0], result_pose[1], result_pose[2], result_pose[3]),
-                new Vector4(result_pose[4], result_pose[5], result_pose[6], result_pose[7]),
-                new Vector4(result_pose[8], result_pose[9], result_pose[10], result_pose[11]),
-                new Vector4(result_pose[12], result_pose[13], result_pose[14], result_pose[15])
-            );
-            UpdateOutput(sample);
-        }
-
-
-
     }
 
     static public void InitOutput(Matrix4x4 matrix)
@@ -167,10 +178,18 @@ public class PoseVisualizer : MonoBehaviour
         var scaleRatio = Mathf.Tan(Mathf.Deg2Rad * 35f) / (matrix.m23 * Mathf.Tan(Mathf.Deg2Rad * 35f));
         scale = new Vector3(scaleRatio, scaleRatio, scaleRatio);
 
-        Instance._headbandTransform.position = new Vector3(matrix.m03 * Instance._screenRect.width,
-            matrix.m13 * Instance._screenRect.height, matrix.m23);
+        var fovHalfWidth = Mathf.Tan(Mathf.Deg2Rad * 35f) * matrix.m23;
+        var fovHalfHeight = Mathf.Tan(Mathf.Deg2Rad * 35f / 16f * 9f) * matrix.m23;
+        Debug.Log($"fovHalfWidth = {fovHalfWidth}, fovHalfHeight = {fovHalfHeight}");
+
+        Instance._headbandTransform.position = new Vector3(matrix.m03 / fovHalfWidth * Instance._screenRect.width / 2f,
+            matrix.m13 / fovHalfHeight * Instance._screenRect.height / 2f, matrix.m23);
         Instance._headbandTransform.rotation = rotation;
         Instance._headbandTransform.localScale = scale;
+
+        var pos = Instance._headbandTransform.position;
+        // Debug.Log($"{matrix.m03}, {matrix.m13} -> {pos.x}, {pos.y}");
+        Debug.Log($"matrix m03 = {matrix.m03}, m13 = {matrix.m13}, m23 = {matrix.m23}, scaleRatio = {scaleRatio}");
     }
 
     public static Vector3 MPVector3toWorldPosition(RectTransform screenTransform, Vector3 mpVector3)
